@@ -59,3 +59,52 @@ $max-viewport: 1792;
     &:-ms-input-placeholder      {@content;}
     &::placeholder               {@content;}
 }
+
+// Mixin for inline svg
+/* Usage
+    url-encode: https://yoksel.github.io/url-encoder/
+    WARNING YOU NEED TO TEST ON I11
+    .donwload {
+        background-image: get-icon( 'caret-right', #d95a2b );
+    }
+*/
+$icons: (
+	'download': '<svg xmlns="http://www.w3.org/2000/svg" width="30.544" height="25.294" viewBox="0 0 30.544 25.294"><g transform="translate(-991.366 -1287.5)"><path d="M1454.5,1298.922l6.881,6.881-6.881,6.881" transform="translate(2312.404 -157.556) rotate(90)" fill="none" stroke="%%COLOR%%" stroke-width="3"/><path d="M8853.866,5633.57v9.724h27.544v-9.724" transform="translate(-7861 -4332)" fill="none" stroke="%%COLOR%%" stroke-linejoin="round" stroke-width="3"/><line y2="14" transform="translate(1006.5 1287.5)" fill="none" stroke="%%COLOR%%" stroke-width="3"/></g></svg>',
+	'external': '<svg xmlns="http://www.w3.org/2000/svg" width="31.408" height="33.919" viewBox="0 0 31.408 33.919"><g transform="translate(-1008.919 -965.628)"><g transform="translate(1046.174 2398.574) rotate(-135)"><path d="M0,0,7.879,7.879,0,15.759" transform="translate(1025.259 990.17) rotate(90)" fill="none" stroke="%%COLOR%%" stroke-width="3"/><line y2="16.032" transform="translate(1017.516 980.5)" fill="none" stroke="%%COLOR%%" stroke-width="3"/></g><path d="M10683.643,5322.808v10.24h-20.386v-21.215h7.446" transform="translate(-9652.838 -4335)" fill="none" stroke="%%COLOR%%" stroke-width="3"/></g></svg>',
+	'caret-right': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.129 34.016"><path d="M1454.5,1298.922l15.947,15.947-15.947,15.947" transform="translate(-1453.439 -1297.861)" fill="none" stroke="%%COLOR%%" stroke-width="3"/></svg>',
+);
+
+$data-svg-prefix: 'data:image/svg+xml;utf-8,';
+
+@function str-replace( $string, $search, $replace ) {
+
+	$index: str-index( $string, $search );
+
+	@if $index {
+
+		@return str-slice( $string, 1, $index - 1 ) + $replace + str_replace( str-slice( $string, $index + str-length( $search ) ), $search, $replace );
+	}
+
+	@return $string;
+}
+
+@function get-icon( $icon, $color: #fff ) {
+	
+	@if 'color' != type-of( $color ) {
+		
+		@warn 'The requested color - "' + $color + '" - was not recognized as a Sass color value.';
+		@return null;
+	}
+	
+	@if map-has-key( $icons, $icon ) {
+
+		$icon:        map-get( $icons, $icon );
+		$placeholder: '%%COLOR%%';
+		$data-uri:    str-replace( url( $data-svg-prefix + $icon ), $placeholder, $color );
+
+		@return str-replace( $data-uri, '#', '%23' );
+	}
+	
+	@warn 'The requested icon - "' + $icon + '" - is not defined in the $icons map.';
+	@return null;
+}
